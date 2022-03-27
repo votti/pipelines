@@ -175,15 +175,24 @@ def get_refresh_token_from_client_id(client_id, client_secret):
     return get_refresh_token_from_code(auth_code, client_id, client_secret)
 
 def get_auth_code(client_id):
-    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&response_type=code&scope=openid%%20email&access_type=offline&redirect_uri=urn:ietf:wg:oauth:2.0:oob"%client_id
+    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&response_type=code&scope=openid%%20email&access_type=offline&redirect_uri=http://localhost:1" % client_id
     print(auth_url)
     open_new_tab(auth_url)
-    return input("If there's no browser window prompt, please direct to the URL above, then copy and paste the authorization code here: ")
+    return input(
+            "If there's no browser window prompt, please direct to the URL above, \n"
+            "At the end the browser will fail to connect to http://localhost:1/?code=SOMECODE&scope=..., \n"
+            "Copy the value of SOMECODE from the address and paste it here: \n"
+    )
 
 
 def get_refresh_token_from_code(auth_code, client_id, client_secret):
-    payload = {"code": auth_code, "client_id": client_id, "client_secret": client_secret,
-               "redirect_uri": "urn:ietf:wg:oauth:2.0:oob", "grant_type": "authorization_code"}
+    payload = {
+        "code": auth_code,
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": "http://localhost:1",
+        "grant_type": "authorization_code"
+    }
     res = requests.post(OAUTH_TOKEN_URI, data=payload)
     res.raise_for_status()
     return str(json.loads(res.text)[u"refresh_token"])
